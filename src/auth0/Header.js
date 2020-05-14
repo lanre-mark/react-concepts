@@ -14,8 +14,8 @@ const Header = () => {
   const {
     isAuthenticated,
     userProfile,
-    auth0LockClient,
     loginPopup,
+    logout,
   } = LoginAuthorization();
   let page;
   // console.log(isAuthenticated, " isAuthenticated on Header ");
@@ -35,6 +35,7 @@ const Header = () => {
   return (
     <div>
       <button onClick={loginPopup}>Here to Login</button>
+      <button onClick={logout}>Here to Logout</button>
     </div>
   );
 };
