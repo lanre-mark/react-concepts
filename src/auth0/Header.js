@@ -1,23 +1,15 @@
 import React from "react";
-// import { Navbar, Nav, NavItem } from "react-bootstrap";
 
 import { LoginAuthorization } from "./now/AuthContextProvider";
 
 const Header = () => {
-  // onLogin(){
-  //   this.props.onLogin();
-  // }
-  // onLogout(){
-  //   this.props.onLogout();
-  // }
-
   const {
-    isAuthenticated,
-    userProfile,
+    // isAuthenticated,
+    // userProfile,
     loginPopup,
     logout,
   } = LoginAuthorization();
-  let page;
+  // let page;
   // console.log(isAuthenticated, " isAuthenticated on Header ");
   // console.log(userProfile, " userProfile on Header ");
   // console.log(auth0LockClient, " auth0LockClient on Header ");
