@@ -5,10 +5,6 @@ import Header from "./auth0/Header";
 import { LoginAuthProvider } from "./auth0/now/AuthContextProvider";
 import auth0Customize from "./auth0/now/AuthCustomize";
 
-const onRedirectCallback = () => {
-  console.log("Please say me well to logout");
-};
-
 /**
  *
  */
@@ -21,13 +17,12 @@ function App() {
         <h1 className="App-title">Demystifying React Concepts</h1>
       </header>
       <LoginAuthProvider
-        onRedirectCallback={onRedirectCallback}
         config={{
-          clientID: "s5BA3M7qgE6YHeZgkzChE3Z5Lwv18rqF",
-          domain: "dev-mypandem.auth0.com",
+          clientID: "xxxxxxxxxxxxxxxxxx",
+          domain: "xxxxxxxxxxxxxxxxxx",
           options: auth0Customize,
         }}
-        memoryKey={"auth0:mee"}
+        memoryKey={"xxxxxxxxxxxxx"}
       >
         <Header />
       </LoginAuthProvider>
