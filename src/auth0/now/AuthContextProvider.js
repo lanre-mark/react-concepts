@@ -14,8 +14,8 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
   // };
 
   const defaultProps = {
-    clientID: "s5BA3M7qgE6YHeZgkzChE3Z5Lwv18rqF", // config.clientID
-    domain: "dev-mypandem.auth0.com", // config.domain
+    clientID: config.clientID,
+    domain: config.domain,
     options: auth0Customize,
   };
 
