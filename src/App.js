@@ -18,11 +18,11 @@ function App() {
       </header>
       <LoginAuthProvider
         config={{
-          clientID: "xxxxxxxxxxxxxxxxxxxx",
-          domain: "*************************",
+          clientID: "s5BA3M7qgE6YHeZgkzChE3Z5Lwv18rqF",
+          domain: "dev-mypandem.auth0.com",
           options: auth0Customize,
         }}
-        memoryKey={"******************"}
+        memoryKey={"auth0:mee"}
       >
         <Header />
       </LoginAuthProvider>

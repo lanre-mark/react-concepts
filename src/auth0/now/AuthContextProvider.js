@@ -2,8 +2,6 @@ import React, { useState, useEffect, useContext } from "react"; // useReducer fo
 import PropTypes from "prop-types";
 import Auth0Lock from "auth0-lock";
 
-import auth0Customize from "./AuthCustomize";
-
 const LoginAuthContext = React.createContext(); // Context
 export const LoginAuthorization = () => useContext(LoginAuthContext);
 
@@ -16,17 +14,17 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
   const defaultProps = {
     clientID: config.clientID,
     domain: config.domain,
-    options: auth0Customize,
+    options: config.options,
   };
 
   // const reducer = (state, action) => {};
   // const [state, dispatch] = useReducer(reducer, initialState);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userProfile, setUserProfile] = useState({});
+  const [userProfile, setUserProfile] = useState(undefined);
   const [auth0LockClient, setAuth0Lock] = useState();
   const [expiryBy, setAuthExpiry] = useState(0);
-  const [loginOpen, setLoginOpen] = useState(false); // not used anymore
+  const [loginOpen, setLoginOpen] = useState(false);
   const [authRenewalId, setRenewalIden] = useState(null);
   const [raiseRenewalFlags, setRenewalFlags] = useState(false);
 
@@ -40,7 +38,7 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
       setAuth0Lock(auth0LockHook);
     };
     initAuthorization();
-  }, []);
+  }, [defaultProps.clientID, defaultProps.domain, defaultProps.options]);
 
   useEffect(() => {
     const ExistinAuthCall = async () => {
@@ -50,6 +48,19 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
       ExistinAuthCall();
       auth0LockClient.on("authenticated", async (authResponse) => {
         await handleObtainUserInfo(authResponse);
+        setLoginOpen(false);
+      });
+      auth0LockClient.on("authorization_error", async (error) => {
+        // received an authentication error, needs to be handled
+        // NOTE this promise must be resolved
+      });
+      auth0LockClient.on("signup error", async (error) => {
+        // recturned an error while signing up, needs to be handled
+        // NOTE this promise must be resolved
+      });
+      auth0LockClient.on("unrecoverable_error", async (error) => {
+        // received an unrecoverbale error perhaps Connection etc, needs to be handled
+        // NOTE this promise must be resolved
       });
     }
   }, [auth0LockClient]);
@@ -58,33 +69,41 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     if (raiseRenewalFlags) {
       // when flag is set to true
       // initiate call to renew token
-      auth0LockClient.checkSession({}, async (err, authResponse) => {
-        console.log("checkSession err", err);
-        console.log("checkSession response", authResponse);
-        await unlockUserFromEnvironment();
-        setUserProfile({});
-        setIsAuthenticated(false);
-        if (err || !authResponse) {
-          await loginPopup({});
-        } else {
-          await handleObtainUserInfo(authResponse);
+      // need to add pervious scope here
+      auth0LockClient.checkSession(
+        { scope: "myScopes" },
+        async (err, authResponse) => {
+          // console.log("checkSession err", err);
+          // console.log("checkSession response", authResponse);
+          await unlockUserFromEnvironment();
+          setUserProfile(undefined);
+          setIsAuthenticated(false);
+          if (err || !authResponse) {
+            await handleLogin({});
+          } else {
+            await handleObtainUserInfo(authResponse);
+            setLoginOpen(false);
+          }
         }
-      });
+      );
 
       setRenewalFlags(false);
     }
   }, [raiseRenewalFlags]);
 
   const handleObtainUserInfo = async (authResponse) => {
+    console.log("HandleObtainUserInfo Response ::", authResponse);
     await auth0LockClient.getUserInfo(
       authResponse.accessToken,
       async (error, profile) => {
         if (error) {
           throw new Error(error);
         }
+        console.log("HandleObtainUserInfo Profile ::", profile);
         try {
           await auth0LockClient.hide();
           const user = await createUsermeta(authResponse, profile);
+          console.log("HandleObtainUserInfo User ::", user);
           setUserProfile(user);
           setIsAuthenticated(true);
           setAuthExpiry(user.expiresat);
@@ -97,14 +116,14 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     );
   };
 
-  const loginPopup = async (params = {}) => {
+  const handleLogin = async (params = {}) => {
     try {
+      setLoginOpen(true);
       await auth0LockClient.show(params);
     } catch (error) {
       console.error(error);
     } finally {
       // just notify of actions to be taken while User is on Auth0 login page
-      setLoginOpen(true);
     }
   };
 
@@ -119,16 +138,17 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
         ? checkAuthExpired(usermeta.expiresat)
         : [true, -1];
       if (usermeta && !noReAuth) {
-        console.log("scedule Auth refesh");
-        await scheduleAuthRefresh(validDelay);
-        setAuthExpiry(usermeta.expiresat);
+        // console.log("scedule Auth refesh");
+        setUserProfile(usermeta);
         setIsAuthenticated(true);
+        setAuthExpiry(usermeta.expiresat);
+        await scheduleAuthRefresh(validDelay);
       } else {
         // make sure the token key exist and not just default to Login unless app
         // has been used on this browser environment before
-        console.log("just relogin");
+        // console.log("just relogin");
         if (usermeta) {
-          await loginPopup();
+          await handleLogin();
         }
       }
     } catch (error) {
@@ -136,14 +156,13 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     }
   };
 
-  const logout = async () => {
+  const handleLogout = async (...p) => {
     // clear any scheduled timeout for a token refresh/renewal
     // remove user from any saved state in browser
     // log out API call to Auth0 with redirection to current page
     // reset user Profile object
     // reset isAuthenticated to false
     try {
-      // clearTimeout(authRenewalId);
       console.log("Time of Expiry :: ", expiryBy);
       console.log("isAuthenticated :: ", isAuthenticated);
       console.log("AuthRefreshTaskID :: ", authRenewalId);
@@ -151,13 +170,11 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
         "Reminaing Delay for Expiry :: ",
         (expiryBy > 0 ? expiryBy : 0) - Date.now()
       );
-
-      // await unlockUserFromEnvironment();
-      // await auth0LockClient.logout({
-      //   returnTo: window.location.origin,  //window.location.pathname
-      // });
-      // setUserProfile({});
-      // setIsAuthenticated(false);
+      clearTimeout(authRenewalId);
+      await unlockUserFromEnvironment();
+      await auth0LockClient.logout(...p);
+      setUserProfile(undefined);
+      setIsAuthenticated(false);
     } catch (error) {
       console.error(error);
       throw new Error(error);
@@ -173,6 +190,8 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
         accesstoken: authResponse.accessToken,
         idtoken: authResponse.idToken,
         idtokenpayload: authResponse.idTokenPayload,
+        scope: authResponse.scope,
+        state: authResponse.state,
         expiresat: JSON.stringify(
           authResponse.expiresIn * 1000 + new Date().getTime()
         ),
@@ -222,10 +241,10 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     <LoginAuthContext.Provider
       value={{
         isAuthenticated,
-        userProfile,
+        userProfile: userProfile ? userProfile.profile : userProfile,
         loginOpen,
-        loginPopup,
-        logout,
+        handleLogin,
+        logout: (...p) => handleLogout(...p),
       }}
     >
       {children}
