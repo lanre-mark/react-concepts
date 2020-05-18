@@ -1,6 +1,7 @@
 import React from "react";
 
 import { LoginAuthorization } from "./now/AuthContextProvider";
+import { baseApiUrl } from "../axios/ApiCallWrapper";
 
 const Header = () => {
   const {
@@ -9,6 +10,10 @@ const Header = () => {
     handleLogin,
     logout,
   } = LoginAuthorization();
+
+  const apiCheck = () => {
+    console.log(baseApiUrl);
+  };
 
   // let page;
   // console.log(isAuthenticated, " isAuthenticated on Header ");
@@ -29,6 +34,7 @@ const Header = () => {
     <div>
       <button onClick={handleLogin}>Here to Login</button>
       <button onClick={logout}>Here to Logout</button>
+      <button onClick={apiCheck}>Checking the Axios</button>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react"; // useReducer for now uncomment
+import React, { useState, useEffect, useContext, useRef } from "react"; // useReducer for now uncomment
 import PropTypes from "prop-types";
 import Auth0Lock from "auth0-lock";
 
@@ -27,6 +27,65 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
   const [loginOpen, setLoginOpen] = useState(false);
   const [authRenewalId, setRenewalIden] = useState(null);
   const [raiseRenewalFlags, setRenewalFlags] = useState(false);
+  const [authToken, setAuthToken] = useState("");
+
+  let referenceActivities = useRef();
+
+  useEffect(() => {
+    referenceActivities.current = {
+      async handleExistinAuthIf() {
+        try {
+          const usermeta = await returnUserinEnvironment();
+          const [noReAuth, validDelay] = usermeta
+            ? checkAuthExpired(usermeta.expiresat)
+            : [true, -1];
+          if (usermeta && !noReAuth) {
+            setUserProfile(usermeta);
+            setIsAuthenticated(true);
+            setAuthToken(usermeta.accesstoken);
+            setAuthExpiry(usermeta.expiresat);
+            await scheduleAuthRefresh(validDelay);
+          } else {
+            // make sure the token key exist and not just default to Login unless app
+            // has been used on this browser environment before
+            if (usermeta) {
+              await handleLogin();
+            }
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      },
+      async handleObtainUserInfo(authResponse) {
+        console.log("about to handle user info");
+        await auth0LockClient.getUserInfo(
+          authResponse.accessToken,
+          async (error, profile) => {
+            if (error) {
+              throw new Error(error);
+            }
+            setAuthToken(authResponse.accessToken);
+            console.log("obtained token ", authResponse.accessToken);
+            try {
+              await auth0LockClient.hide();
+              const [user, validDelay] = await createUsermeta(
+                authResponse,
+                profile
+              );
+              console.log("returned user profile ", user);
+              setUserProfile(user);
+              setIsAuthenticated(true);
+              await scheduleAuthRefresh(validDelay);
+              setAuthExpiry(user.expiresat);
+              await lockUsertoEnvironment(user);
+            } catch (error) {
+              throw new Error(error);
+            }
+          }
+        );
+      },
+    };
+  });
 
   useEffect(() => {
     const initAuthorization = async () => {
@@ -42,25 +101,31 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
 
   useEffect(() => {
     const ExistinAuthCall = async () => {
-      await handleExistinAuthIf();
+      console.log("run HandleExisting from factory");
+      await referenceActivities.current.handleExistinAuthIf();
+      console.log("completed HandleExisting from factory");
     };
     if (auth0LockClient) {
       ExistinAuthCall();
       auth0LockClient.on("authenticated", async (authResponse) => {
-        await handleObtainUserInfo(authResponse);
+        console.log("authentication response ::", authResponse);
+        await referenceActivities.current.handleObtainUserInfo(authResponse);
         setLoginOpen(false);
       });
       auth0LockClient.on("authorization_error", async (error) => {
         // received an authentication error, needs to be handled
         // NOTE this promise must be resolved
+        console.log("authorization error");
       });
       auth0LockClient.on("signup error", async (error) => {
         // recturned an error while signing up, needs to be handled
         // NOTE this promise must be resolved
+        console.log("sugnup error");
       });
       auth0LockClient.on("unrecoverable_error", async (error) => {
         // received an unrecoverbale error perhaps Connection etc, needs to be handled
         // NOTE this promise must be resolved
+        console.log("unrecoverable error");
       });
     }
   }, [auth0LockClient]);
@@ -78,10 +143,13 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
           await unlockUserFromEnvironment();
           setUserProfile(undefined);
           setIsAuthenticated(false);
+          setAuthToken("");
           if (err || !authResponse) {
             await handleLogin({});
           } else {
-            await handleObtainUserInfo(authResponse);
+            await referenceActivities.current.handleObtainUserInfo(
+              authResponse
+            );
             setLoginOpen(false);
           }
         }
@@ -91,30 +159,34 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     }
   }, [raiseRenewalFlags]);
 
-  const handleObtainUserInfo = async (authResponse) => {
-    console.log("HandleObtainUserInfo Response ::", authResponse);
-    await auth0LockClient.getUserInfo(
-      authResponse.accessToken,
-      async (error, profile) => {
-        if (error) {
-          throw new Error(error);
-        }
-        console.log("HandleObtainUserInfo Profile ::", profile);
-        try {
-          await auth0LockClient.hide();
-          const user = await createUsermeta(authResponse, profile);
-          console.log("HandleObtainUserInfo User ::", user);
-          setUserProfile(user);
-          setIsAuthenticated(true);
-          setAuthExpiry(user.expiresat);
-          scheduleAuthRefresh(-1);
-          await lockUsertoEnvironment(user);
-        } catch (error) {
-          throw new Error(error);
-        }
-      }
-    );
-  };
+  // const handleObtainUserInfo = async (authResponse) => {
+  //   console.log("HandleObtainUserInfo Response ::", authResponse);
+  //   await auth0LockClient.getUserInfo(
+  //     authResponse.accessToken,
+  //     async (error, profile) => {
+  //       if (error) {
+  //         throw new Error(error);
+  //       }
+  //       console.log("HandleObtainUserInfo Profile ::", profile);
+  //       setAuthToken(authResponse.accessToken);
+  //       try {
+  //         await auth0LockClient.hide();
+  //         const [user, validDelay] = await createUsermeta(
+  //           authResponse,
+  //           profile
+  //         );
+  //         console.log("HandleObtainUserInfo User ::", user);
+  //         setUserProfile(user);
+  //         setIsAuthenticated(true);
+  //         await scheduleAuthRefresh(validDelay);
+  //         setAuthExpiry(user.expiresat);
+  //         await lockUsertoEnvironment(user);
+  //       } catch (error) {
+  //         throw new Error(error);
+  //       }
+  //     }
+  //   );
+  // };
 
   const handleLogin = async (params = {}) => {
     try {
@@ -131,30 +203,31 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     setRenewalFlags(true);
   };
 
-  const handleExistinAuthIf = async () => {
-    try {
-      const usermeta = await returnUserinEnvironment();
-      const [noReAuth, validDelay] = usermeta
-        ? checkAuthExpired(usermeta.expiresat)
-        : [true, -1];
-      if (usermeta && !noReAuth) {
-        // console.log("scedule Auth refesh");
-        setUserProfile(usermeta);
-        setIsAuthenticated(true);
-        setAuthExpiry(usermeta.expiresat);
-        await scheduleAuthRefresh(validDelay);
-      } else {
-        // make sure the token key exist and not just default to Login unless app
-        // has been used on this browser environment before
-        // console.log("just relogin");
-        if (usermeta) {
-          await handleLogin();
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const handleExistinAuthIf = async () => {
+  //   try {
+  //     const usermeta = await returnUserinEnvironment();
+  //     const [noReAuth, validDelay] = usermeta
+  //       ? checkAuthExpired(usermeta.expiresat)
+  //       : [true, -1];
+  //     if (usermeta && !noReAuth) {
+  //       // console.log("scedule Auth refesh");
+  //       setUserProfile(usermeta);
+  //       setIsAuthenticated(true);
+  //       setAuthToken(usermeta.accesstoken);
+  //       setAuthExpiry(usermeta.expiresat);
+  //       await scheduleAuthRefresh(validDelay);
+  //     } else {
+  //       // make sure the token key exist and not just default to Login unless app
+  //       // has been used on this browser environment before
+  //       // console.log("just relogin");
+  //       if (usermeta) {
+  //         await handleLogin();
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const handleLogout = async (...p) => {
     // clear any scheduled timeout for a token refresh/renewal
@@ -170,11 +243,12 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
         "Reminaing Delay for Expiry :: ",
         (expiryBy > 0 ? expiryBy : 0) - Date.now()
       );
-      clearTimeout(authRenewalId);
-      await unlockUserFromEnvironment();
-      await auth0LockClient.logout(...p);
-      setUserProfile(undefined);
-      setIsAuthenticated(false);
+      // clearTimeout(authRenewalId);
+      // await unlockUserFromEnvironment();
+      // await auth0LockClient.logout(...p);
+      // setUserProfile(undefined);
+      // setIsAuthenticated(false);
+      // setAuthToken('')
     } catch (error) {
       console.error(error);
       throw new Error(error);
@@ -198,7 +272,7 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
         isAuthenticated: true,
         profile: profile,
       };
-      return usermeta;
+      return [usermeta, parseInt(usermeta.expiresat) - new Date().getTime()];
     } catch (error) {
       console.error(error);
       // raise notification error to backend logs
@@ -226,9 +300,12 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
   };
 
   const scheduleAuthRefresh = async (state) => {
+    console.log("scheduleAuthRefresh :: ", expiryBy);
+    console.log("scheduleAuthRefresh :: ", Date.now());
     let waitDelay = (expiryBy > 0 ? expiryBy : 0) - Date.now() || state;
     waitDelay = waitDelay <= 0 ? state : waitDelay;
     if (waitDelay > 0) {
+      console.log("Setting up renewal");
       setRenewalIden(
         setTimeout(() => {
           handleTokenRenewal();
@@ -241,6 +318,7 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     <LoginAuthContext.Provider
       value={{
         isAuthenticated,
+        authToken,
         userProfile: userProfile ? userProfile.profile : userProfile,
         loginOpen,
         handleLogin,
