@@ -35,14 +35,14 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     referenceActivities.current = {
       async handleExistinAuthIf() {
         try {
-          const usermeta = await returnUserinEnvironment();
+          const usermeta = await referenceActivities.current.returnUserinEnvironment();
           const [noReAuth, validDelay] = usermeta
             ? checkAuthExpired(usermeta.expiresat)
             : [true, -1];
           if (usermeta && !noReAuth) {
             setUserProfile(usermeta);
             setIsAuthenticated(true);
-            setAuthToken(usermeta.accesstoken);
+            await setAuthToken(usermeta.accesstoken);
             setAuthExpiry(usermeta.expiresat);
             await scheduleAuthRefresh(validDelay);
           } else {
@@ -57,7 +57,6 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
         }
       },
       async handleObtainUserInfo(authResponse) {
-        console.log("about to handle user info");
         await auth0LockClient.getUserInfo(
           authResponse.accessToken,
           async (error, profile) => {
@@ -65,14 +64,12 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
               throw new Error(error);
             }
             setAuthToken(authResponse.accessToken);
-            console.log("obtained token ", authResponse.accessToken);
             try {
               await auth0LockClient.hide();
               const [user, validDelay] = await createUsermeta(
                 authResponse,
                 profile
               );
-              console.log("returned user profile ", user);
               setUserProfile(user);
               setIsAuthenticated(true);
               await scheduleAuthRefresh(validDelay);
@@ -83,6 +80,13 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
             }
           }
         );
+      },
+      async unlockUserFromEnvironment() {
+        await localStorage.removeItem(memoryKey);
+      },
+      async returnUserinEnvironment() {
+        const usermeta = await localStorage.getItem(memoryKey);
+        return usermeta ? await JSON.parse(usermeta) : null;
       },
     };
   });
@@ -140,7 +144,7 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
         async (err, authResponse) => {
           // console.log("checkSession err", err);
           // console.log("checkSession response", authResponse);
-          await unlockUserFromEnvironment();
+          await referenceActivities.current.unlockUserFromEnvironment();
           setUserProfile(undefined);
           setIsAuthenticated(false);
           setAuthToken("");
@@ -157,6 +161,7 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
 
       setRenewalFlags(false);
     }
+    // eslint-disable-next-line
   }, [raiseRenewalFlags]);
 
   // const handleObtainUserInfo = async (authResponse) => {
@@ -244,7 +249,7 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
         (expiryBy > 0 ? expiryBy : 0) - Date.now()
       );
       // clearTimeout(authRenewalId);
-      // await unlockUserFromEnvironment();
+      // await referenceActivities.current.unlockUserFromEnvironment();
       // await auth0LockClient.logout(...p);
       // setUserProfile(undefined);
       // setIsAuthenticated(false);
@@ -285,13 +290,13 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
     await localStorage.setItem(memoryKey, JSON.stringify(usermeta));
 
   // remove user from browser state environment
-  const unlockUserFromEnvironment = async () =>
-    await localStorage.removeItem(memoryKey);
+  // const unlockUserFromEnvironment = async () =>
+  //   await localStorage.removeItem(memoryKey);
 
-  const returnUserinEnvironment = async () => {
-    const usermeta = await localStorage.getItem(memoryKey);
-    return usermeta ? await JSON.parse(usermeta) : null;
-  };
+  // const returnUserinEnvironment = async () => {
+  //   const usermeta = await localStorage.getItem(memoryKey);
+  //   return usermeta ? await JSON.parse(usermeta) : null;
+  // };
 
   const checkAuthExpired = (expiry) => {
     const crAt = new Date().getTime(); // current time for validation
@@ -300,12 +305,9 @@ export const LoginAuthProvider = ({ children, config, memoryKey }) => {
   };
 
   const scheduleAuthRefresh = async (state) => {
-    console.log("scheduleAuthRefresh :: ", expiryBy);
-    console.log("scheduleAuthRefresh :: ", Date.now());
     let waitDelay = (expiryBy > 0 ? expiryBy : 0) - Date.now() || state;
     waitDelay = waitDelay <= 0 ? state : waitDelay;
     if (waitDelay > 0) {
-      console.log("Setting up renewal");
       setRenewalIden(
         setTimeout(() => {
           handleTokenRenewal();

@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import { LoginAuthorization } from "./now/AuthContextProvider";
-import { baseApiUrl } from "../axios/ApiCallWrapper";
+import { GeneralDataAdapter } from "../axios/Providers/GeneralDataProvider";
 
 const Header = () => {
   const {
@@ -11,9 +11,32 @@ const Header = () => {
     logout,
   } = LoginAuthorization();
 
-  const apiCheck = () => {
-    console.log(baseApiUrl);
+  const { getGeneralData } = GeneralDataAdapter();
+
+  const loadAgerange = async () => {
+    await getGeneralData.getAgeRanges();
   };
+
+  const loadGender = async () => {
+    await getGeneralData.getGender();
+  };
+
+  const [_storyFlags, setStoryFlags] = useState();
+  const [_ageRanges, setAgeranges] = useState();
+  const [_gender, setGender] = useState();
+
+  useEffect(() => {
+    if (getGeneralData.payload && getGeneralData.modelType) {
+      if (getGeneralData.modelType === "storyflag") {
+        setStoryFlags(getGeneralData.payload);
+      } else if (getGeneralData.modelType === "agerange") {
+        setAgeranges(getGeneralData.payload);
+      } else if (getGeneralData.modelType === "gender") {
+        setGender(getGeneralData.payload);
+      }
+    }
+    // eslint-disable-next-line
+  }, [getGeneralData.payload]);
 
   // let page;
   // console.log(isAuthenticated, " isAuthenticated on Header ");
@@ -34,7 +57,17 @@ const Header = () => {
     <div>
       <button onClick={handleLogin}>Here to Login</button>
       <button onClick={logout}>Here to Logout</button>
-      <button onClick={apiCheck}>Checking the Axios</button>
+      <button onClick={loadAgerange}>Checking the Axios - AgeRange</button>
+      <button onClick={loadGender}>Checking the Axios - Gender</button>
+      <select>
+        {_ageRanges &&
+          _ageRanges.map((item) => (
+            <option key={item._id} value={item.range}>
+              {item.range}
+            </option>
+          ))}
+        )}
+      </select>
     </div>
   );
 };
