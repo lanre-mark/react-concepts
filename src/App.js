@@ -4,6 +4,7 @@ import "./App.css";
 import Header from "./auth0/Header";
 import { LoginAuthProvider } from "./auth0/now/AuthContextProvider";
 import auth0Customize from "./auth0/now/AuthCustomize";
+import { GeneralDataContextProvider } from "./axios/Providers/GeneralDataProvider";
 
 /**
  *
@@ -18,13 +19,15 @@ function App() {
       </header>
       <LoginAuthProvider
         config={{
-          clientID: "xxxxxxxxxxxxxxxxxxxx",
-          domain: "*************************",
+          clientID: "xxx-xxxxxx-xxxx-xxxx-xxxx-xxx",
+          domain: "xxxxx-xxxxxxxx-xxxxx",
           options: auth0Customize,
         }}
-        memoryKey={"******************"}
+        memoryKey={"auth0:mee"}
       >
-        <Header />
+        <GeneralDataContextProvider>
+          <Header />
+        </GeneralDataContextProvider>
       </LoginAuthProvider>
     </div>
   );
