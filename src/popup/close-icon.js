@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import shortid from "shortid";
 
-const id = `more${shortid.generate()}`;
+const id = `close${shortid.generate()}`;
 const Icon = ({ title, desc, strokeColor, ...props }) => {
   return (
     <svg
