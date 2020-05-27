@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { LoginAuthorization } from "./now/AuthContextProvider";
 import { GeneralDataAdapter } from "../axios/Providers/GeneralDataProvider";
 
+import MainPopup from "../popup/PopupContainer";
+
 const Header = () => {
   const {
     // isAuthenticated,
@@ -53,9 +55,20 @@ const Header = () => {
   //     Login
   //   </NavItem>
   // );
+
+  const onSubmit = (event) => {
+    event.preventDefault(event);
+    console.log("Alias :: ", event.target.name.value);
+    console.log("Age Range :: ", event.target.agerange.value);
+    console.log("Country :: ", event.target.country.value);
+    console.log("City :: ", event.target.city.value);
+    console.log("Ethnicity :: ", event.target.ethnicity.value);
+    console.log("Gender :: ", event.target.gender.value);
+  };
+
   return (
     <div>
-      <button onClick={handleLogin}>Here to Login</button>
+      {/* <button onClick={handleLogin}>Here to Login</button>
       <button onClick={logout}>Here to Logout</button>
       <button onClick={loadAgerange}>Checking the Axios - AgeRange</button>
       <button onClick={loadGender}>Checking the Axios - Gender</button>
@@ -67,7 +80,9 @@ const Header = () => {
             </option>
           ))}
         )}
-      </select>
+      </select> */}
+      {/* <CloseIcon className="modal__close-icon" /> */}
+      <MainPopup onSubmit={onSubmit} />
     </div>
   );
 };
