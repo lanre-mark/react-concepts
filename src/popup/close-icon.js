@@ -1,3 +1,4 @@
+import React from "react";
 import PropTypes from "prop-types";
 import shortid from "shortid";
 
@@ -11,6 +12,7 @@ const Icon = ({ title, desc, strokeColor, ...props }) => {
       height="40px"
       viewBox="0 0 40 40"
       version="1.1"
+      className="modal__close-icon"
     >
       <title id={`${id}_Title`}>{title}</title>
       <desc id={`${id}_Desc`}>{desc}</desc>
