@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import shortid from 'shortid';
 
-const id = `wind${shortid.generate()}`;
+const id = `rain-freezing-color${shortid.generate()}`;
 const Icon = ({ title, desc, fillColor1, fillColor2, ...props }) => {
   return (
     <svg
