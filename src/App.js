@@ -19,8 +19,8 @@ function App() {
       </header>
       <LoginAuthProvider
         config={{
-          clientID: 's5BA3M7qgE6YHeZgkzChE3Z5Lwv18rqF',
-          domain: 'dev-mypandem.auth0.com',
+          clientID: process.env.REACT_APP_AUTH0_CLIENT_ID,
+          domain: process.env.REACT_APP_AUTH0_DOMAIN,
           options: auth0Customize,
         }}
         memoryKey={'auth0:mee'}
