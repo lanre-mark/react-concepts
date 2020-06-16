@@ -1,24 +1,24 @@
-import React, { useState, useEffect, useContext } from "react";
-import createAuth0Client from "@auth0/auth0-spa-js";
+import React, { useState, useEffect, useContext } from 'react';
+import createAuth0Client from '@auth0/auth0-spa-js';
 
 const options = {
   languageDictionary: {
-    emailInputPlaceholder: "something@youremail.com",
-    title: "Come view Stories",
+    emailInputPlaceholder: 'something@youremail.com',
+    title: 'Come view Stories',
   },
   theme: {
-    logo: "https://img.icons8.com/nolan/64/ioxhost.png",
-    primaryColor: "#31324F",
+    logo: 'https://img.icons8.com/nolan/64/ioxhost.png',
+    primaryColor: '#31324F',
     authButtons: {
       testConnection: {
-        displayName: "Test Conn",
-        primaryColor: "#b7b7b7",
-        foregroundColor: "#000000",
-        icon: "https://img.icons8.com/nolan/64/ioxhost.png",
+        displayName: 'Test Conn',
+        primaryColor: '#b7b7b7',
+        foregroundColor: '#000000',
+        icon: 'https://img.icons8.com/nolan/64/ioxhost.png',
       },
       testConnection2: {
-        primaryColor: "#000000",
-        foregroundColor: "#ffffff",
+        primaryColor: '#000000',
+        foregroundColor: '#ffffff',
       },
     },
   },
@@ -66,8 +66,8 @@ export const LoginAuthProvider = ({
       setAuth0(auth0FromHook);
 
       if (
-        window.location.search.includes("code=") &&
-        window.location.search.includes("state=")
+        window.location.search.includes('code=') &&
+        window.location.search.includes('state=')
       ) {
         // authenticate the user from the hook
         const { appState } = await auth0FromHook.handleRedirectCallback();
@@ -139,3 +139,232 @@ export const LoginAuthProvider = ({
     </LoginAuthContext.Provider>
   );
 };
+
+/*
+import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import { Flags } from 'react-feature-flags';
+import { useMediaQuery } from 'react-responsive';
+import { LoginAuthorization } from '../SiteLogin/AuthorizeContextProvider';
+
+import base from './wide-base@2x.png';
+import Chat from '../../common/icons/Chat';
+// import AddStoryIcon from '../../common/icons/AddStory';
+import LocationIcon from '../../common/icons/LocationIcon';
+import SideListIcon from '../../common/icons/SideList';
+import GeoSearchBar from '../GeoSearchBar/GeoSearchBar';
+import { limitNameCount } from '../../common/helpers/helper';
+import { config } from '../../common/config/config';
+import MainPopup from '../Popup/PopupContainer';
+import './Navbar.scss';
+
+const Logo = () => {
+  return (
+    <>
+      <div className="navbar__group31">
+        <div className="navbar__group12">
+          <img alt="icon1" src={base} className="navbar__base" />
+        </div>
+        <Chat className="navbar__chat6" />
+      </div>
+      <div className="navbar__app-name">
+        <p className="navbar__app-name-first">MY PANDEMIC</p>
+        <p className="navbar__app-name-second">EXPERIENCE</p>
+      </div>
+    </>
+  );
+};
+
+const Navbar = (props) => {
+  const {
+    userProfile,
+    loginOpen,
+    handleLogin,
+    logout,
+    triggerMoreInfo,
+    resetMoreinfo,
+  } = LoginAuthorization();
+  const isBigScreen = useMediaQuery({ query: '(min-device-width: 768px)' });
+  const [hover, setHover] = useState(false);
+
+  const handleHover = () => {
+    setHover(!hover);
+  };
+
+  const updateMoreInfoCall = async (event) => {
+    event.preventDefault(event);
+    console.log('Alias :: ', event.target.name.value);
+    console.log('Age Range :: ', event.target.agerange.value);
+    console.log('Country :: ', event.target.country.value);
+    console.log('City :: ', event.target.city.value);
+    console.log('Ethnicity :: ', event.target.ethnicity.value);
+    console.log('Gender :: ', event.target.gender.value);
+  };
+
+  return (
+    <Flags authorizedFlags={['nav']}>
+      <header>
+        <nav className="navbar">
+          <ul>
+            <li>
+              <Flags
+                authorizedFlags={['nav.CLICKABLE']}
+                renderOn={() => (
+                  <NavLink to="" onClick={() => {}}>
+                    <Logo />
+                  </NavLink>
+                )}
+                renderOff={() => <Logo />}
+              />
+            </li>
+            <Flags authorizedFlags={['nav.LOCATION']}>
+              <li>
+                <LocationIcon className="navbar__icon" withRadius={false} />
+              </li>
+            </Flags>
+            <Flags authorizedFlags={['nav.LIST_ALL']}>
+              <li>
+                <SideListIcon className="navbar__sidelist" withRadius={false} />
+              </li>
+            </Flags>
+
+            <li>
+              {loginOpen === false && userProfile ? (
+                <div className="navbar__profile">
+                  {!loginOpen && userProfile && (
+                    <>
+                      {!userProfile.picture && (
+                        <p
+                          onMouseEnter={handleHover}
+                          onTouchStart={handleHover}
+                          className="__signInOrUp--small"
+                        >
+                          {limitNameCount(
+                            userProfile.name,
+                            config.profileNameLimit
+                          )}
+                        </p>
+                      )}
+                      {userProfile.picture && (
+                        <>
+                          {isBigScreen === true ? (
+                            <div
+                              className="rounded__avatar"
+                              onMouseEnter={handleHover}
+                              onTouchStart={handleHover}
+                            >
+                              <span>
+                                {limitNameCount(
+                                  userProfile.name,
+                                  config.profileNameLimit
+                                )}
+                              </span>
+                              <img
+                                src={userProfile.picture}
+                                alt="avatar"
+                                className="user__avatar"
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              className="rounded__avatar"
+                              onMouseEnter={handleHover}
+                              onTouchStart={handleHover}
+                            >
+                              <img
+                                src={userProfile.picture}
+                                alt="avatar"
+                                className="user__avatar"
+                              />
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {userProfile && userProfile.name && (
+                        <div
+                          style={{
+                            visibility: hover === true ? 'visible' : 'hidden',
+                          }}
+                          className="profile__dropdown"
+                        >
+                          {isBigScreen === true ? null : (
+                            <span>
+                              {limitNameCount(
+                                userProfile.name,
+                                config.profileNameLimit
+                              )}
+                            </span>
+                          )}
+
+                          <NavLink className="__signInOrUp--active" to="#">
+                            My Account
+                          </NavLink>
+
+                          <NavLink
+                            className="__signInOrUp--active"
+                            to="#"
+                            onClick={() =>
+                              logout({ returnTo: window.location.origin })
+                            }
+                          >
+                            Log Out
+                          </NavLink>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="navbar__signInOrUp">
+                  {!loginOpen && !userProfile && (
+                    <>
+                      <Flags authorizedFlags={['nav.SIGNIN']}>
+                        <>
+                          <NavLink
+                            className="__signInOrUp--inactive"
+                            to="#"
+                            onClick={handleLogin}
+                          >
+                            Sign Up
+                          </NavLink>
+                        </>
+                      </Flags>
+
+                      <Flags authorizedFlags={['nav.SIGNUP']}>
+                        <NavLink
+                          className="__signInOrUp--inactive"
+                          to="#"
+                          onClick={handleLogin}
+                        >
+                          Sign In
+                        </NavLink>
+                      </Flags>
+                    </>
+                  )}
+                </div>
+              )}
+              {!loginOpen && userProfile && triggerMoreInfo && (
+                <>
+                  <MainPopup
+                    onSubmit={updateMoreInfoCall}
+                    handlePopupSessionClose={() => resetMoreinfo(false)}
+                  />
+                </>
+              )}
+            </li>
+            <Flags authorizedFlags={['nav.SEARCH']}>
+              <li>
+                <GeoSearchBar />
+              </li>
+            </Flags>
+          </ul>
+        </nav>
+        {props.children}
+      </header>
+    </Flags>
+  );
+};
+
+export default Navbar;
+
+*/
