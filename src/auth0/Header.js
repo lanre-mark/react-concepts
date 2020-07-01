@@ -5,6 +5,11 @@ import { GeneralDataAdapter } from '../axios/Providers/GeneralDataProvider';
 
 import MainPopup from '../popup/PopupContainer';
 import Map04 from '../maptest/map';
+import useClockTicker from '../exten/clock/clockhook';
+
+import Clock from '../exten/clock/extenClock';
+import Accordion from '../exten/collapsible/wrap-collapse';
+import Base from '../question/sections/quest';
 
 const Header = () => {
   const {
@@ -15,6 +20,55 @@ const Header = () => {
   } = LoginAuthorization();
 
   const { getGeneralData } = GeneralDataAdapter();
+
+  // const clockDate = useClockTicker({
+  //   label: 'California',
+  //   value: 'America/Los_Angeles',
+  // });
+  // const clockDate1 = useClockTicker({
+  //   label: 'Lagos',
+  //   value: 'Africa/Lagos',
+  // });
+  // const clockDate2 = useClockTicker({
+  //   label: 'Macau',
+  //   value: 'Asia/Macau',
+  // });
+  // const clockPayload = {
+  //   theme: {
+  //     colorLightest: '#f0f0f0',
+  //     colorLight: '#cecece',
+  //     colorMedium: '#adadad',
+  //     colorDark: '#414141',
+  //     colorWhite: '#fff',
+  //     colorBlack: '#000',
+  //   },
+  //   clockSize: '230px',
+  //   date: clockDate,
+  // };
+  // const clockPayload1 = {
+  //   theme: {
+  //     colorLightest: '#f0f0f0',
+  //     colorLight: '#cecece',
+  //     colorMedium: '#adadad',
+  //     colorDark: '#414141',
+  //     colorWhite: '#fff',
+  //     colorBlack: '#000',
+  //   },
+  //   clockSize: '230px',
+  //   date: clockDate1,
+  // };
+  // const clockPayload2 = {
+  //   theme: {
+  //     colorLightest: '#f0f0f0',
+  //     colorLight: '#cecece',
+  //     colorMedium: '#adadad',
+  //     colorDark: '#414141',
+  //     colorWhite: '#fff',
+  //     colorBlack: '#000',
+  //   },
+  //   clockSize: '230px',
+  //   date: clockDate2,
+  // };
 
   const loadAgerange = async () => {
     await getGeneralData.getAgeRanges();
@@ -54,7 +108,17 @@ const Header = () => {
   return (
     <div>
       {/* <MainPopup onSubmit={onSubmit} /> */}
-      <Map04></Map04>
+      {/* <Map04></Map04> */}
+      {/* <MainFrame></MainFrame> */}
+      {/* <Clock {...clockPayload}></Clock>
+      <Clock {...clockPayload1}></Clock>
+      <Clock {...clockPayload2}></Clock> */}
+      {/* <Base></Base> */}
+      {Array(5)
+        .fill('')
+        .map((i, ii) => (
+          <Accordion key={ii}></Accordion>
+        ))}
     </div>
   );
 };
