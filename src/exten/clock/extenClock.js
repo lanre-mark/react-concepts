@@ -6,7 +6,7 @@ import {
   HourLine,
   DigitalWrap,
   DigitalWrapLabel,
-} from './styles';
+} from './components';
 import './extenClock.css';
 
 const Clock = (props) => {
