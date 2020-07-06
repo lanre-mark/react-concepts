@@ -65,3 +65,21 @@ a.__signInOrUp--active {
 .__signInOrUp--active {
   color: #2c7613;
 }
+
+.leaderboard-list__item--enter {
+  transform: rotateX(-90deg);
+}
+.leaderboard-list__item--enter-active {
+  transform: rotateX(0);
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.leaderboard-list__item--enter-done {
+}
+
+.leaderboard-list__item--exit {
+}
+.leaderboard-list__item--exit-active {
+  transform: translateY(100px);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.55, 0, 1, 0.45), opacity 0.5s;
+}
