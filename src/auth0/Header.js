@@ -7,9 +7,7 @@ import MainPopup from '../popup/PopupContainer';
 import Map04 from '../maptest/map';
 import useClockTicker from '../exten/clock/clockhook';
 
-import Clock from '../exten/clock/extenClock';
 import Accordion from '../exten/collapsible/wrap-collapse';
-import Base from '../question/sections/quest';
 
 const Header = () => {
   const {
@@ -114,11 +112,13 @@ const Header = () => {
       <Clock {...clockPayload1}></Clock>
       <Clock {...clockPayload2}></Clock> */}
       {/* <Base></Base> */}
-      {Array(5)
-        .fill('')
-        .map((i, ii) => (
-          <Accordion key={ii}></Accordion>
-        ))}
+      <div style={{ width: '20vw' }}>
+        {Array(3)
+          .fill('')
+          .map((i, ii) => (
+            <Accordion key={ii}></Accordion>
+          ))}
+      </div>
     </div>
   );
 };
