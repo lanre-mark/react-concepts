@@ -16,7 +16,7 @@ import './wrap.css';
 
 import Clock from '../clock/extenClock';
 import useClockTicker from '../clock/clockhook';
-import { WeatherCard } from '../weather-card/weather-card';
+import { WeatherCard } from '../weather-card';
 
 const weather1 = {
   base: 'stations',
