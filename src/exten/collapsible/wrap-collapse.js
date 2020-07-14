@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { CSSTransition } from 'react-transition-group';
 
-import { Item } from '../carousel/components';
 import Carousel from '../carousel';
 
 import {
@@ -17,6 +16,44 @@ import './wrap.css';
 
 import Clock from '../clock/extenClock';
 import useClockTicker from '../clock/clockhook';
+import { WeatherCard } from '../weather-card/weather-card';
+
+const weather1 = {
+  base: 'stations',
+  clouds: { all: 40 },
+  cod: 200,
+  coord: { lon: 3.39, lat: 6.45 },
+  dt: 1593826154,
+  id: 2332459,
+  main: {
+    feels_like: 31.35,
+    humidity: 94,
+    pressure: 1013,
+    temp: 26,
+    temp_max: 26,
+    temp_min: 26,
+  },
+  name: 'Lagos',
+  country: 'Nigeria',
+  sys: {
+    type: 1,
+    id: 1185,
+    country: 'NG',
+    sunrise: 1593840971,
+    sunset: 1593885917,
+  },
+  timezone: 3600,
+  visibility: 10000,
+  weather: [
+    {
+      id: 200,
+      main: 'Thunderstorm',
+      description: 'thunderstorm with light rain',
+      icon: '11n',
+    },
+  ],
+  wind: { speed: 1.5, deg: 250 },
+};
 
 const responseBE = [
   {
@@ -260,7 +297,7 @@ const Accordion = () => {
       colorWhite: '#fff',
       colorBlack: '#000',
     },
-    clockSize: '130px',
+    clockSize: '190px',
     date: clockDate,
   };
 
@@ -289,11 +326,19 @@ const Accordion = () => {
           classNames='leaderboard-list__item-'
         >
           <Carousel title='Carousel'>
-            {Array(3)
+            {Array(2)
               .fill('')
-              .map((i, ii) => (
-                <Clock key={ii} {...clockPayload}></Clock>
-              ))}
+              .map((i, ii) =>
+                ii === 0 ? (
+                  <Clock key={ii} {...clockPayload}></Clock>
+                ) : (
+                  <WeatherCard
+                    key={ii}
+                    realtimeResponse={weather1}
+                    location={'Los Angeles, California, United States'}
+                  ></WeatherCard>
+                )
+              )}
           </Carousel>
         </CSSTransition>
       </Content>
