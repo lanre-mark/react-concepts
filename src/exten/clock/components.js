@@ -91,6 +91,7 @@ const minuteLabel = (ii, width) => {
 const ClocksBase = styled.div`
   width: ${(props) => props.width || '130px'};
   height: ${(props) => props.width || '130px'};
+  margin-right: 20px;
   border-radius: 25%;
   display: flex;
   justify-content: center;

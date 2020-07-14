@@ -7,7 +7,6 @@ import {
   DigitalWrap,
   DigitalWrapLabel,
 } from './components';
-import './extenClock.css';
 
 const Clock = (props) => {
   let secs = props.date.seconds() * 6 + 180;
