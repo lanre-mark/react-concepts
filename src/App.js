@@ -2,7 +2,6 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Header from './auth0/Header';
-import Mount from './Mount';
 import { LoginAuthProvider } from './auth0/now/AuthContextProvider';
 import auth0Customize from './auth0/now/AuthCustomize';
 import { GeneralDataContextProvider } from './axios/Providers/GeneralDataProvider';
@@ -30,7 +29,6 @@ function App() {
           <Header />
         </GeneralDataContextProvider>
       </LoginAuthProvider>
-      {/* <Mount></Mount> */}
     </div>
   );
 }

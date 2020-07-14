@@ -1,5 +1,9 @@
 import React from 'react';
-import { TimerHandSeconds, TimerHandMinutes, TimerHandHours } from './styles';
+import {
+  TimerHandSeconds,
+  TimerHandMinutes,
+  TimerHandHours,
+} from './components';
 
 export const ClockHand = (props) => {
   //const getStyle = (pos, type) => {

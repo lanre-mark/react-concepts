@@ -6,8 +6,7 @@ import {
   HourLine,
   DigitalWrap,
   DigitalWrapLabel,
-} from './styles';
-import './extenClock.css';
+} from './components';
 
 const Clock = (props) => {
   let secs = props.date.seconds() * 6 + 180;

@@ -1,0 +1,122 @@
+.weather-base {
+  font-family: 'Muli', sans-serif;
+  font-size: 10px;
+  color: #6c757d;
+
+  background-color: #ebebeb;
+  box-sizing: border-box;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+}
+
+.weather-root {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  border: solid 1px #ebebeb;
+  padding: 10px;
+  display: inline-block;
+  background-color: #000000;
+  width: 25%;
+  font-family: 'Muli', sans-serif;
+  font-size: 10px;
+  color: #6c757d;
+  box-sizing: border-box;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+}
+
+.realtime {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  color: #ebebeb;
+  text-align: left;
+}
+
+.realtime-temp {
+  font-size: 14px;
+  line-height: 2px;
+  font-weight: 400;
+  color: #ebebeb;
+}
+
+.realtime-temp-degrees {
+  font-weight: bold;
+  align-self: flex-start;
+  margin-right: 2px;
+  margin-top: 8px;
+  color: #ebebeb;
+}
+
+.realtime-weather-code {
+  /* color: #000000; */
+  color: #ebebeb;
+}
+
+.realtime-icon {
+  width: 36px;
+  height: 36px;
+  margin-left: auto;
+}
+
+@media only screen and (max-width: 768px) {
+  .realtime-temp {
+    font-size: 25px;
+    line-height: 20px;
+  }
+
+  .realtime-temp-degrees {
+    margin-right: 10px;
+  }
+
+  .realtime-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .realtime-feels-like {
+    margin-right: 10px;
+  }
+}
+
+.icon {
+  height: 10px;
+  width: 10px;
+  vertical-align: middle;
+}
+
+/* .app-root {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  border: solid 1px var(--grey-light);
+  padding: 10px;
+  display: inline-block;
+} */
+
+.divider {
+  border-bottom: solid 1px #ebebeb;
+  margin: 0px -16px 0px -16px;
+}
+
+.time {
+  margin-bottom: 2px;
+  text-align: left;
+  color: #ebebeb;
+}
+
+.location {
+  margin-bottom: 12px;
+  text-align: left;
+  color: #ebebeb;
+}
+
+.location-icon {
+  margin-right: 2px;
+  opacity: 0.5;
+  color: #ebebeb;
+}
